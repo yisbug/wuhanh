@@ -1,19 +1,18 @@
 <template>
 	<view>
-		<navUrl :url="url"></navUrl>
 		<view class="hospital-area">
 			<view class="area_1">
 				<div class="company">
 					<div class="label">医院名称:</div>
 					<textarea v-model="formData.company" placeholder="点击输入" />
 					</div>
-				<div>
+				<!-- <div>
 					<div class="label">是否接受付费购买：</div>
 					<div :class="`select ${formData.needToPay ? 'on' : 'off'}`">
 						<div @click="formData.needToPay = true">是</div>
 						<div @click="formData.needToPay = false">否</div>
 					</div>
-				</div>
+				</div> -->
 				<div>
 					<div class="label">联系人</div>
 					<div>
@@ -23,18 +22,26 @@
 				<uni-card v-for="(item, index) in formData.contacts" :key="index" :title="'第' + (index + 1) + '个联系人'" extra="删除" @clickExtra="delContact" :outIndex="index">
 				    <div>
 				    	<div class="label">姓名：</div>
-				    	<input type="text" placeholder="点击输入"  v-model="formData.contacts[index].name">
+				    	<input class="input-box" type="text" placeholder="点击输入" placeholder-style="color:#4B8AE5" v-model="formData.contacts[index].name">
 				    </div>
 				    <div>
 				    	<div class="label">联系电话：</div>
-				    	<input type="number" placeholder="点击输入"  v-model="formData.contacts[index].phone">
+				    	<input class="input-box" type="number" placeholder="点击输入" placeholder-style="color:#4B8AE5" v-model="formData.contacts[index].phone">
 				    </div>
 				</uni-card>
 				<div>
 					<div class="label">所在区域：</div>
-					<div @click="showSelectCityFlag = true">
-						{{formData.province ? formData.province + formData.city + formData.area + formData.deliveryArea : '省/市/区'  }}
+					<div>
+						<view v-if="formData.province == ''" type="buttom" @click="showMulLinkageThreePickerSend"
+							  class="row-input plh need">选择省市区
+						</view>
+						<view v-else type="buttom" @click="showMulLinkageThreePickerSend" class="row-input">
+							{{formData.province+formData.city + formData.area}}
+						</view>
 					</div>
+					<!-- <div @click="showSelectCityFlag = true">
+						{{formData.province ? formData.province + formData.city + formData.area + formData.deliveryArea : '省/市/区'  }}
+					</div> -->
 				</div>
 				<div class="street">
 					<div class="label">医院地址：</div>
@@ -54,7 +61,7 @@
 				</template>
 			</view>
 			<view class="area_3">
-				<div class="title">快递对接信息</div>
+				<div class="title">物资快递信息</div>
 				<div>
 					<div class="label">快递地址：</div>
 					<input type="text" placeholder="点击输入" v-model="formData.receiptInfo.street">
@@ -102,13 +109,19 @@
 					<div class="label">辖区人口总数：</div>
 					<input type="number" placeholder="点击输入" v-model="formData.totalAmount">
 				</div>
-				
 				<div>
 					<div class="label">辖区内医院数：</div>
 					<input type="number" placeholder="点击输入" v-model="formData.totalHos">
 				</div>
-						
 			</view>
+		
+			<view class="submit" v-if="id" @click="submit">
+				提交医院名单修改申请
+			</view>
+			<view class="submit" v-else @click="submit">
+				提交医院名单申请
+			</view>
+			
 			<view v-show="showSelectCityFlag">
 				<view class="mask"></view>
 				<view class="select-time">
@@ -135,48 +148,42 @@
 						</view>
 				</view>
 			</view>
-			<view class="submit" v-if="id" @click="submit">
-				提交医院名单修改申请
-			</view>
-			<view class="submit" v-else @click="submit">
-				提交医院名单申请
-			</view>
-			<view class="model" v-if="showModel">
-				<div class="area">
-					<div class="choose">
-						<div>
-							<div class="choose-item" @click="nowChoose.type = 0">
-								<span :class="{active: nowChoose.type === 0}"></span>
-								<span>数量不限</span>
-							</div>
+		</view>
+		<view class="model" v-show="showModel">
+			<div class="area">
+				<div class="choose">
+					<!-- <div>
+						<div class="choose-item" @click="nowChoose.type = 0">
+							<span :class="{active: nowChoose.type === 0}"></span>
+							<span>数量不限</span>
 						</div>
-						<div>
-							<div class="choose-item" @click="nowChoose.type = 1">
-								<span :class="{active: nowChoose.type === 1}"></span>
-								<span>不需要</span>
-							</div>
-						</div>
-						<div>
-							<div class="choose-item" @click="nowChoose.type = 2">
-								<span :class="{active: nowChoose.type === 2}"></span>
-								<span>具体数量</span>
-							</div>
-							<div class="input-item">
-								<input type="number" v-model="nowChoose.num">
-								<span>个</span>
-							</div>
+					</div> -->
+					<div>
+						<div class="choose-item" @click="nowChoose.type = 1">
+							<span :class="{active: nowChoose.type === 1}"></span>
+							<span>不需要</span>
 						</div>
 					</div>
-					<div class="btn-box">
-						<div @click="cancel">取消</div>
-						<div @click="ok">确认</div>
+					<div>
+						<div class="choose-item" @click="nowChoose.type = 2">
+							<span :class="{active: nowChoose.type === 2}"></span>
+							<span>具体数量</span>
+						</div>
+						<div class="input-item">
+							<input type="number" v-model="nowChoose.num">
+							<span>个</span>
+						</div>
 					</div>
 				</div>
-			</view>
+				<div class="btn-box">
+					<div @click="cancel">取消</div>
+					<div @click="ok">确认</div>
+				</div>
+			</div>
 		</view>
 		<mpvue-city-picker :themeColor="themeColor" ref="mpvueCityPicker" 
 		:pickerValueDefault="cityPickerValueDefault" @onCancel="onCancel" @onConfirm="onCityConfirm"></mpvue-city-picker>
-	</view>
+		</view>
 	</view>
 </template>
 
@@ -223,55 +230,55 @@
 							name: '医用外科口罩',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '医用防护口罩',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '防护帽',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '一次性医用防护服',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '手术衣',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '防护眼镜',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '防护眼罩',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '护目镜',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 						{
 							name: '医用一次性乳胶手套',
 							standard: '',
 							unit: '个',
-							amount: 0
+							amount: -1
 						},
 					],
 					
@@ -352,10 +359,11 @@
 				}
 			},
 			chooseNum(item, index) {
+				console.log(item,index)
 				this.nowChoose.index = index;
 				this.nowChoose.type = item.amount === 0 ? 0 : item.amount > 0 ? 2 : 1;
 				this.nowChoose.num = item.amount > 0 ? item.amount : null;
-				this.showModel = !this.showModel;
+				this.showModel = true;
 			},
 			checkItem(item) {
 				return item.amount > 0 ? item.amount + ' 个' : item.amount === 0 ? '数量不限' : '不需要'
@@ -412,6 +420,14 @@
 				let _that = this
 				if (!_that.formData.company) {
 				    _that.$utils.showModal("请写正确的医院名称")
+				    return;
+				}
+				if (_that.formData.contacts.length == 0) {
+				    _that.$utils.showModal("请填写联系人")
+				    return;
+				}
+				if (!_that.formData.street) {
+				    _that.$utils.showModal("请填写详细地址")
 				    return;
 				}
 				console.log('2222:===', _that.formData)
@@ -583,6 +599,7 @@
 				content: "";
 				position: absolute;
 				bottom: 0;
+				left: 0;
 				width: 96px;
 				height: 4px;
 				background: #4B8AE5;
@@ -634,7 +651,7 @@
 		
 		>.area {
 			width: 100%;
-			height: 255px;
+			height: 180px;
 			background-color: #FFFFFF;
 			display: flex;
 			flex-direction: column;
@@ -784,5 +801,10 @@
 				border-left: none;
 			}
 		}
+	}
+	.input-box{
+		height: 60upx;
+		direction: flex;
+		align-items: center;
 	}
 </style>
